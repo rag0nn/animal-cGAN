@@ -110,7 +110,6 @@ class Process():
         self.d_losses_real = []
         self.d_losses_fake = []
         self.g_losses = []
-        pass
     
     def show_outputs(self,d_loss_real,d_loss_fake,g_loss,interval_test_sample):
         self.d_losses_fake.append(d_loss_fake)
@@ -146,7 +145,8 @@ class Process():
                         d_loss_real,d_loss_fake,g_loss,
                         interval_test_sample,
                         g_save_path,d_save_path,
-                        checkpoint_path
+                        checkpoint_path,
+                        outputs_path
                         ):
         # models save
         g_model.save(g_save_path+f"/g_model_{train_topic}_{epoch}.h5")
@@ -158,4 +158,4 @@ class Process():
         f.close()
 
         # sample save
-        cv2.imwrite(f'./training/samples/{train_topic}_{epoch}.jpg',interval_test_sample)
+        cv2.imwrite(f'{outputs_path}/{train_topic}_{epoch}.jpg',interval_test_sample)

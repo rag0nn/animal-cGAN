@@ -2,13 +2,21 @@
 from tensorflow.keras.layers import Dense, Flatten,Input, Conv2D, UpSampling2D,Conv2DTranspose ,MaxPooling2D, Dropout,Embedding,Reshape,Concatenate # type: ignore
 from tensorflow.keras.models import Model # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
+import numpy as np
+import cv2
 
 class Models():
     
     def build_models(self,img_shape,num_classes,latent_dim):
-        self.discriminator = Models.build_discriminator(img_shape,num_classes)
+        self.loss = 'binary_crossentropy'
+        self.opt = Adam(0.0002, 0.5)
+        
+        self.img_shape = img_shape
+        self.discriminator = Models.build_discriminator(self.img_shape,num_classes)
+        self.discriminator.compile(loss=self.loss, optimizer=self.opt)
         self.generator = Models.build_generator(latent_dim,num_classes)
         self.gan = Models.build_gan(self.generator,self.discriminator,latent_dim)
+        self.gan.compile(loss=self.loss, optimizer=self.opt)
         return self.discriminator,self.generator,self.gan
     
     def build_discriminator(img_shape,num_classes):
@@ -67,7 +75,6 @@ class Models():
 
 
     def build_gan(generator, discriminator, latent_dim):
-        
         noise_input = Input(shape=(latent_dim,))
         label_input = Input(shape=(1,))
 
@@ -79,7 +86,7 @@ class Models():
 
         
         model = Model([noise_input, label_input], validity, name="gan")
-        model.compile(loss="binary_crossentropy", optimizer=Adam(0.0002, 0.5))
+        
 
         return model
 
@@ -91,3 +98,20 @@ class Models():
     
     def show_gan(self):
         return self.gan.summary()
+    
+    def test_generator(self,noise,label):
+        """
+        Test the generator with noise and label
+        :input:
+            noise: noise input : 100 int
+            label: label input : 0,1,2 int
+        """
+        count = noise.shape[0]
+        label = np.array([label])
+        generated_images = self.generator.predict([noise, label])
+        
+        output =np.zeros((self.img_shape[0],self.img_shape[1]*count,self.img_shape[2]))
+        for i ,out in enumerate(generated_images):
+            output[:,i*self.img_shape[1]:(i+1)*self.img_shape[1]] = out
+            cv2.putText(output,label[i],(10 + i*self.img_shape[1],25),cv2.FONT_HERSHEY_PLAIN,0.7,(255,0,0),1)
+        return output
