@@ -107,11 +107,8 @@ class Models():
             label: label input : 0,1,2 int
         """
         count = noise.shape[0]
-        label = np.array([label])
         generated_images = self.generator.predict([noise, label])
         
-        output =np.zeros((self.img_shape[0],self.img_shape[1]*count,self.img_shape[2]))
-        for i ,out in enumerate(generated_images):
-            output[:,i*self.img_shape[1]:(i+1)*self.img_shape[1]] = out
-            cv2.putText(output,label[i],(10 + i*self.img_shape[1],25),cv2.FONT_HERSHEY_PLAIN,0.7,(255,0,0),1)
-        return output
+        
+
+        return generated_images

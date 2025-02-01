@@ -1,0 +1,3 @@
+
+train:02_01-03_14 epoch:0 d_loss_real:0.1527344 d_loss_fake:0.6817572 g_loss:0.7140504
+train:02_01-03_14 epoch:5 d_loss_real:0.5110939 d_loss_fake:0.5989822 g_loss:0.8879296

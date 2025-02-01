@@ -120,21 +120,21 @@ class Process():
 
         # test sample image
         plt.figure(figsize=(10,7))    
-        plt.imshow(cv2.cvtColor(interval_test_sample,cv2.COLOR_BGR2RGB)); plt.axis("off");plt.title('Test')
+        plt.imshow(interval_test_sample); plt.axis("off");plt.title('Test')
         plt.show()
 
-        # grafic of losses
-        fig, axes = plt.subplots(1, 1, figsize=(10, 7))
+        # graphic of losses
+        plt.figure(figsize=(10, 7))
         
-        axes[0].plot(epochs_history, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
-        axes[0].plot(epochs_history, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
-        axes[0].plot(epochs_history, self.g_losses, label='G Losses', color='red', marker='s')
-        axes[0].set_title('Loss History')
-        axes[0].set_xlabel('Epoch')
-        axes[0].set_ylabel('Loss')
-        axes[0].legend()
-        axes[0].grid(True)
-     
+        plt.plot(epochs_history, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
+        plt.plot(epochs_history, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
+        plt.plot(epochs_history, self.g_losses, label='G Losses', color='red', marker='s')
+        plt.title('Loss History')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.grid(True)
+         
         plt.tight_layout()
         plt.show()
         
