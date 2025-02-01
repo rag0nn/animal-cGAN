@@ -2,22 +2,25 @@
 from tensorflow.keras.layers import Dense, Flatten,Input, Conv2D, UpSampling2D,Conv2DTranspose ,MaxPooling2D, Dropout,Embedding,Reshape,Concatenate # type: ignore
 from tensorflow.keras.models import Model # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
-import numpy as np
-import cv2
+
 
 class Models():
     
     def build_models(self,img_shape,num_classes,latent_dim):
         self.loss = 'binary_crossentropy'
-        self.opt = Adam(0.0002, 0.5)
+        self.opt_disc = Adam(0.0002, 0.5)
+        self.opt_gen = Adam(0.0004, 0.5)
         
         self.img_shape = img_shape
         self.discriminator = Models.build_discriminator(self.img_shape,num_classes)
-        self.discriminator.compile(loss=self.loss, optimizer=self.opt)
+        self.discriminator.compile(loss=self.loss, optimizer=self.opt_disc)
         self.generator = Models.build_generator(latent_dim,num_classes)
         self.gan = Models.build_gan(self.generator,self.discriminator,latent_dim)
-        self.gan.compile(loss=self.loss, optimizer=self.opt)
+        self.gan.compile(loss=self.loss, optimizer=self.opt_gen)
         return self.discriminator,self.generator,self.gan
+    
+    def build_via_transfer(self):
+        pass
     
     def build_discriminator(img_shape,num_classes):
         # image input
@@ -106,9 +109,4 @@ class Models():
             noise: noise input : 100 int
             label: label input : 0,1,2 int
         """
-        count = noise.shape[0]
-        generated_images = self.generator.predict([noise, label])
-        
-        
-
-        return generated_images
+        return self.generator.predict([noise, label])
