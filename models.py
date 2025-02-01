@@ -1,8 +1,8 @@
 
 from tensorflow.keras.layers import Dense, Flatten,Input, Conv2D, UpSampling2D,Conv2DTranspose ,MaxPooling2D, Dropout,Embedding,Reshape,Concatenate # type: ignore
-from tensorflow.keras.models import Model # type: ignore
+from tensorflow.keras.models import Model,load_model # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
-
+import os
 
 class Models():
     
@@ -19,8 +19,28 @@ class Models():
         self.gan.compile(loss=self.loss, optimizer=self.opt_gen)
         return self.discriminator,self.generator,self.gan
     
-    def build_via_transfer(self):
-        pass
+    def build_via_transfer(self,gen_save_path,disc_save_path,latent_dim):
+        gen_path = gen_save_path + '/' + os.listdir(gen_save_path)[-1]
+        disc_path = disc_save_path + '/' + os.listdir(disc_save_path)[-1]
+        
+        print("Loading generator: ",gen_path)
+        print('Loading Discriminator: ',disc_path)    
+        self.discriminator = load_model(disc_path)
+        self.generator = load_model(gen_path)
+        print("Loaded Discriminator:",disc_path)
+        print("Loaded Generator",gen_path)
+        
+        self.gan = Models.build_gan(self.generator,self.discriminator,latent_dim)
+        print("GAN Built")
+    
+        self.loss = 'binary_crossentropy'
+        self.opt_disc = Adam(0.0002, 0.5)
+        self.opt_gen = Adam(0.0004, 0.5)
+        
+        self.discriminator.compile(loss=self.loss, optimizer=self.opt_disc)
+        self.gan.compile(loss=self.loss, optimizer=self.opt_gen)
+        
+        return self.discriminator,self.generator,self.gan
     
     def build_discriminator(img_shape,num_classes):
         # image input
@@ -110,3 +130,5 @@ class Models():
             label: label input : 0,1,2 int
         """
         return self.generator.predict([noise, label])
+    
+    
