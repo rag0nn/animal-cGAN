@@ -83,6 +83,7 @@ class DataLoader():
         """
         im = tf.cast(im, tf.float32)
         im = im / 255
+        label = tf.cast(label,tf.float32)
         return im,label
 
     @staticmethod
@@ -138,6 +139,22 @@ class Process():
         plt.tight_layout()
         plt.show()
         
+        # graphic of losses [0,1]
+        plt.figure(figsize=(10, 7))
+        
+        plt.plot(epochs_history, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
+        plt.plot(epochs_history, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
+        plt.plot(epochs_history, self.g_losses, label='G Losses', color='red', marker='s')
+        plt.title('Loss History')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.ylim(0,1)
+        plt.legend()
+        plt.grid(True)
+         
+        plt.tight_layout()
+        plt.show()
+        
         
     def save_checkpoint(self,
                         epoch,train_topic,
@@ -159,3 +176,27 @@ class Process():
 
         # sample save
         cv2.imwrite(f'{outputs_path}/{train_topic}_{epoch}.jpg',interval_test_sample)
+        
+    def load_old_metrics(self,checkpoints_path):
+        f = open(checkpoints_path,"r")
+        lines = f.readlines()
+        f.close()
+        
+        for line in lines:
+            metrics = line[:-2].split(" ")
+            for i,metric in enumerate(metrics):
+                a,b = metric.split(":")
+                
+                if i == 0:
+                    pass
+                elif i ==1:
+                    pass
+                elif i ==2:
+                    self.d_losses_real.append(float(b))
+                elif i ==3:
+                    self.d_losses_fake.append(float(b))
+                elif i==4:
+                    self.g_losses.append(float(b))
+                
+            
+        

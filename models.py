@@ -2,6 +2,7 @@
 from tensorflow.keras.layers import Dense, Flatten,Input, Conv2D, UpSampling2D,Conv2DTranspose ,MaxPooling2D, Dropout,Embedding,Reshape,Concatenate # type: ignore
 from tensorflow.keras.models import Model,load_model # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
+from tensorflow.keras.initializers import he_normal# type: ignore
 import os
 
 class Models():
@@ -19,10 +20,13 @@ class Models():
         self.gan.compile(loss=self.loss, optimizer=self.opt_gen)
         return self.discriminator,self.generator,self.gan
     
-    def build_via_transfer(self,gen_save_path,disc_save_path,latent_dim):
+    def build_via_transfer(self,gen_save_path,disc_save_path,latent_dim,g_model_name,d_model_name):
+        """
         gen_path = gen_save_path + '/' + os.listdir(gen_save_path)[-1]
         disc_path = disc_save_path + '/' + os.listdir(disc_save_path)[-1]
-        
+        """
+        gen_path = gen_save_path + '/' + g_model_name
+        disc_path = disc_save_path + '/' + d_model_name
         print("Loading generator: ",gen_path)
         print('Loading Discriminator: ',disc_path)    
         self.discriminator = load_model(disc_path)
@@ -47,20 +51,18 @@ class Models():
         img_input = Input(shape=img_shape)
         # label input
         label_input = Input(shape=(1,))
-        label_embedding = Embedding(num_classes, 50)(label_input)
-        label_embedding = Dense(16*16)(label_embedding)
-        label_embedding = Reshape((16,16,1))(label_embedding)
+        label_embedding = Embedding(num_classes, 20)(label_input)
+        label_embedding = Dense(64*64*1)(label_embedding)
+        label_embedding = Reshape((64,64,1))(label_embedding)
         
         
-        x = Conv2D(32, kernel_size=5, strides=2,padding="same")(img_input)
-        x = MaxPooling2D(pool_size=2)(x)
-        x = Conv2D(32, kernel_size=3, strides=2,padding="same")(x)
-        x = MaxPooling2D(pool_size=2)(x)
-        x = Conv2D(32, kernel_size=3, strides=2,padding="same")(x)
-        
+        x = Conv2D(4, kernel_size=3, strides=2,padding="same" ,kernel_initializer=he_normal())(img_input)
+        x = Conv2D(8, kernel_size=3, strides=2,padding="same" ,kernel_initializer=he_normal())(x)
+        x = Conv2D(16, kernel_size=3, strides=2,padding="same" ,kernel_initializer=he_normal())(x)
         merged_input = Concatenate()([x, label_embedding])
-        x = MaxPooling2D(pool_size=2)(merged_input)
-        x = Conv2D(32, kernel_size=3, strides=2,padding="same")(x)
+        x = Conv2D(32, kernel_size=3, strides=2,padding="same" ,kernel_initializer=he_normal())(x)
+        x = Conv2D(64, kernel_size=3, strides=2,padding="same" ,kernel_initializer=he_normal())(x)
+        x = Conv2D(64, kernel_size=3, strides=2,padding="same" ,kernel_initializer=he_normal())(merged_input)
         x = Flatten()(x)
         x = Dropout(0.25)(x)
         x = Dense(1, activation='sigmoid')(x)
@@ -75,22 +77,21 @@ class Models():
         noise_input = Input(shape=(latent_dim,))
         label_input = Input(shape=(1,))
 
-        label_embedding = Embedding(num_classes, 50)(label_input)
+        label_embedding = Embedding(num_classes, 20)(label_input)
         label_embedding = Dense(latent_dim)(label_embedding)
         label_embedding = Reshape((latent_dim,))(label_embedding)
         
         merged_input = Concatenate()([noise_input, label_embedding])
         
-        x = Dense(2*2*32)(merged_input)
-        x = Reshape((2,2,32))(x)
-        x = Conv2DTranspose(32, kernel_size=3, strides=2,padding="same")(x)
-        x = UpSampling2D(size=2)(x)
-        x = Conv2DTranspose(32, kernel_size=3, strides=2,padding="same")(x)
-        x = UpSampling2D(size=2)(x)
-        x = Conv2DTranspose(32, kernel_size=3, strides=2,padding="same")(x)
-        x = UpSampling2D(size=2)(x)
-        x = Conv2DTranspose(32, kernel_size=3, strides=2,padding="same")(x)
-        x = Conv2DTranspose(3, kernel_size=3, strides=2,padding="same")(x)
+        x = Dense(4*4*32)(merged_input)
+        x = Reshape((4,4,32))(x)
+        x = Conv2DTranspose(64, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
+        x = Conv2DTranspose(64, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
+        x = Conv2DTranspose(32, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
+        x = Conv2DTranspose(16, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
+        x = Conv2DTranspose(8, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
+        x = Conv2DTranspose(4, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
+        x = Conv2DTranspose(3, kernel_size=3, strides=2,padding="same", kernel_initializer=he_normal())(x)
         return Model([noise_input, label_input], x, name="generator")
 
     #gen = build_generator(100,3)
@@ -130,5 +131,4 @@ class Models():
             label: label input : 0,1,2 int
         """
         return self.generator.predict([noise, label])
-    
     
