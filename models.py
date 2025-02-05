@@ -3,7 +3,6 @@ from tensorflow.keras.layers import Dense, Flatten,Input, Conv2D, UpSampling2D,C
 from tensorflow.keras.models import Model,load_model # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
 from tensorflow.keras.initializers import he_normal# type: ignore
-import os
 
 class Models():
     
@@ -38,7 +37,7 @@ class Models():
         print("GAN Built")
     
         self.loss = 'binary_crossentropy'
-        self.opt_disc = Adam(0.0002, 0.5)
+        self.opt_disc = Adam(0.0003, 0.5)
         self.opt_gen = Adam(0.0004, 0.5)
         
         self.discriminator.compile(loss=self.loss, optimizer=self.opt_disc)
