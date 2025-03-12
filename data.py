@@ -8,8 +8,8 @@ class DataLoader():
     Data management for labeled image tensorflow datasets.
     """
     
-    def __init__(self,batch_size=4,shuffle=True,image_size=(512,512),scaled=True):
-        self.scaled = scaled
+    def __init__(self,batch_size,image_size,shuffle=True,scale=True):
+        self.scale = scale
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.image_size = image_size
@@ -36,13 +36,12 @@ class DataLoader():
             shuffle=self.shuffle        # Rastgele karıştır
         )
         print("Data loaded successfully.")
-        if self.scaled:
+        if self.scale:
             dataset = dataset.map(DataLoader.scale_im)
             self.im_type = 'float32'
             print("Images scaled to [0,1].")
         self.dataset = dataset
-        return dataset
-    
+        
     def show_sample(self,count=1):
         """
         Get sample from the dataset.
@@ -61,10 +60,10 @@ class DataLoader():
         imgs = np.reshape(imgs, (imgs.shape[0]*imgs.shape[1], imgs.shape[2], imgs.shape[3], imgs.shape[4]))
         lbls = np.reshape(lbls, (lbls.shape[0]*lbls.shape[1]))
 
-        print("CURRENT DATASET SCALE:", self.scaled),
+        print("CURRENT DATASET SCALE:", self.scale),
         print("IMAGE TYPE:", self.im_type)
         
-        plt.figure(figsize=(20, 4))
+        plt.figure(figsize=(20,6))
         counter = 0
         for i in range(count):
             for j in range(self.batch_size):
@@ -74,7 +73,7 @@ class DataLoader():
                 plt.axis('off')
                 counter += 1
         plt.show()
-        return imgs,lbls
+
 
     @staticmethod
     def scale_im(im,label):
@@ -106,30 +105,32 @@ class DataLoader():
 
 
 
-class Process():
-    def __init__(self):
+class SessionMetrics():
+    def __init__(self,metric_save_periot):
         self.d_losses_real = []
         self.d_losses_fake = []
         self.g_losses = []
+        self.epochs = []
+        self.save_periot = metric_save_periot
     
-    def show_outputs(self,d_loss_real,d_loss_fake,g_loss,interval_test_sample):
+    def show_outputs(self,d_loss_real,d_loss_fake,g_loss,epoch,interval_test_sample):
         self.d_losses_fake.append(d_loss_fake)
         self.d_losses_real.append(d_loss_real)
         self.g_losses.append(g_loss)
+        self.epochs.append(epoch)
         
-        epochs_history = range(len(self.d_losses_real))
 
         # test sample image
-        plt.figure(figsize=(10,7))    
+        plt.figure(figsize=(12,8))    
         plt.imshow(interval_test_sample); plt.axis("off");plt.title('Test')
         plt.show()
 
         # graphic of losses
         plt.figure(figsize=(10, 7))
         
-        plt.plot(epochs_history, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
-        plt.plot(epochs_history, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
-        plt.plot(epochs_history, self.g_losses, label='G Losses', color='red', marker='s')
+        plt.plot(self.epochs, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
+        plt.plot(self.epochs, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
+        plt.plot(self.epochs, self.g_losses, label='G Losses', color='red', marker='s')
         plt.title('Loss History')
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
@@ -142,10 +143,10 @@ class Process():
         # graphic of losses [0,1]
         plt.figure(figsize=(10, 7))
         
-        plt.plot(epochs_history, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
-        plt.plot(epochs_history, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
-        plt.plot(epochs_history, self.g_losses, label='G Losses', color='red', marker='s')
-        plt.title('Loss History')
+        plt.plot(self.epochs, self.d_losses_real, label='D Real Losses', color='blue', marker='o')
+        plt.plot(self.epochs, self.d_losses_fake, label='D Fake Losses', color='green', marker='o')
+        plt.plot(self.epochs, self.g_losses, label='G Losses', color='red', marker='s')
+        plt.title('Loss History [0-1]')
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
         plt.ylim(0,1)
@@ -158,25 +159,22 @@ class Process():
         
     def save_checkpoint(self,
                         epoch,train_topic,
-                        g_model,d_model,
                         d_loss_real,d_loss_fake,g_loss,
                         interval_test_sample,
-                        g_save_path,d_save_path,
                         checkpoint_path,
                         outputs_path
                         ):
-        # models save
-        g_model.save(g_save_path+f"/g_model_{train_topic}_{epoch}.h5")
-        d_model.save(d_save_path+f"/d_model_{train_topic}_{epoch}.h5")
+        if epoch % self.save_periot == 0:
+            # metrics save
+            f = open(checkpoint_path,'a')
+            f.writelines(f"\ntrain:{train_topic} epoch:{epoch} d_loss_real:{d_loss_real:.7f} d_loss_fake:{d_loss_fake:.7f} g_loss:{g_loss:.7f}")
+            f.close()
 
-        # metrics save
-        f = open(checkpoint_path,'a')
-        f.writelines(f"\ntrain:{train_topic} epoch:{epoch} d_loss_real:{d_loss_real:.7f} d_loss_fake:{d_loss_fake:.7f} g_loss:{g_loss:.7f}")
-        f.close()
-
-        # sample save
-        cv2.imwrite(f'{outputs_path}/{train_topic}_{epoch}.jpg',interval_test_sample)
-        
+            # sample save
+            cv2.imwrite(f'{outputs_path}/{train_topic}_{epoch}.jpg',cv2.cvtColor(interval_test_sample,cv2.COLOR_BGR2RGB))
+        else:
+            print("Passed metric save.")
+            
     def load_old_metrics(self,checkpoints_path):
         f = open(checkpoints_path,"r")
         lines = f.readlines()
@@ -190,7 +188,7 @@ class Process():
                 if i == 0:
                     pass
                 elif i ==1:
-                    pass
+                    self.epochs.append(int(b))
                 elif i ==2:
                     self.d_losses_real.append(float(b))
                 elif i ==3:

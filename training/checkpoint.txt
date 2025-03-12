@@ -1,0 +1,23 @@
+
+train:02_06-19_26 epoch:0 d_loss_real:0.7966477 d_loss_fake:8.1886448 g_loss:0.0507602
+train:02_06-19_28 epoch:0 d_loss_real:0.7262684 d_loss_fake:8.5602035 g_loss:0.0726067
+train:02_06-19_30 epoch:1 d_loss_real:0.7253854 d_loss_fake:22.1589843 g_loss:0.0033462
+train:02_06-19_34 epoch:0 d_loss_real:0.5936414 d_loss_fake:8.3969444 g_loss:0.0485787
+train:02_06-19_36 epoch:1 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0026848
+train:02_06-19_36 epoch:2 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0021652
+train:02_06-19_38 epoch:0 d_loss_real:0.8150891 d_loss_fake:7.5485967 g_loss:0.0746677
+train:02_06-19_39 epoch:1 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0017270
+train:02_06-19_40 epoch:2 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0009780
+train:02_06-19_40 epoch:3 d_loss_real:0.8148377 d_loss_fake:25.2207654 g_loss:0.0009350
+train:02_06-19_42 epoch:4 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0006129
+train:02_06-19_42 epoch:5 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0009150
+train:02_06-19_43 epoch:6 d_loss_real:0.8161131 d_loss_fake:30.9161820 g_loss:0.0007976
+train:02_06-19_45 epoch:7 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0011958
+train:02_06-19_45 epoch:8 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0006486
+train:02_06-19_45 epoch:9 d_loss_real:0.8137510 d_loss_fake:35.1937887 g_loss:0.0006008
+train:02_06-19_47 epoch:10 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0011927
+train:02_06-19_48 epoch:11 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0003953
+train:02_06-19_48 epoch:12 d_loss_real:0.8153973 d_loss_fake:47.3521169 g_loss:0.0004332
+train:02_06-19_50 epoch:13 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0009088
+train:02_06-19_50 epoch:14 d_loss_real:0.0000000 d_loss_fake:0.0000000 g_loss:0.0009232
+train:02_06-19_51 epoch:15 d_loss_real:0.8144838 d_loss_fake:41.9886445 g_loss:0.0007687
